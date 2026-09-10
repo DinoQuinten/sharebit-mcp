@@ -1,6 +1,6 @@
 {
   "name": "sharebit-mcp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "ShareBit MCP server: pair a coding agent with your ShareBit account and share Markdown over stdio.",
   "type": "module",
   "bin": {
@@ -12,6 +12,8 @@
   "files": [
     "bin",
     "src",
+    "plugin",
+    "SKILL.md",
     "README.md",
     "LICENSE"
   ],

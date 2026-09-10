@@ -1,39 +1,61 @@
 # sharebit-mcp
 
-Connect a coding agent to [ShareBit](https://github.com/DinoQuinten) over the
+Connect a coding agent to [ShareBit](https://sharebit.app) over the
 [Model Context Protocol](https://modelcontextprotocol.io). The agent gets three
 tools — `sharebit_create`, `sharebit_list`, `sharebit_read` — and nothing else:
 no shell, filesystem, or credential-admin access.
 
-This is a stdio MCP server that bridges your host to the hosted ShareBit MCP
-endpoint. You install it once with one command; it stores the per-agent
-credential and registers itself with your host.
+Two ways to install: as an **opencode plugin** (recommended, no config edit), or
+as a **stdio MCP server** for any other host.
 
-## Requirements
+## Install as an opencode plugin
 
-- Node.js 18 or newer (`npx` must be on your PATH)
+Copy [`plugin/sharebit.ts`](./plugin/sharebit.ts) into:
 
-## One command
+- `~/.config/opencode/plugin/sharebit.ts` — every project, or
+- `.opencode/plugin/sharebit.ts` — this project only.
 
-Get a six-character pairing code from the ShareBit setup page, then run:
+Restart opencode. Then pair (see [Connect](#connect)). The credential is read at
+call time, so no token lives in the plugin file.
+
+One command instead, if `npx` is available:
 
 ```sh
-npx -y github:DinoQuinten/sharebit-mcp login \
-  --origin https://YOUR-SHAREBIT-ORIGIN \
-  --code AB2CD9 \
-  --host opencode
+npx -y github:DinoQuinten/sharebit-mcp login --origin https://YOUR-SHAREBIT-ORIGIN --code AB2CD9 --host opencode
 ```
 
-`--host` may be `opencode`, `claude-code`, or `generic`. `login` redeems the
-code, stores the credential at `~/.config/sharebit/credentials.json`, and wires
-the server into the selected host. Restart the host afterwards.
+This installs the plugin and stores the credential in one step.
 
-Pin a release instead of tracking the default branch when you want repeatable
-installs: append `#v1.0.0` to the spec (`github:DinoQuinten/sharebit-mcp#v1.0.0`).
+The agent-facing install and usage instructions live in
+[`SKILL.md`](./SKILL.md) — point your agent at it.
 
-## Manual host config
+## Connect
 
-If you prefer to configure the host yourself (or use `--host generic`):
+Get a six-character pairing code from the ShareBit setup page, then redeem it:
+
+```sh
+curl -sX POST https://YOUR-SHAREBIT-ORIGIN/api/v1/pairing-sessions/redeem \
+  -H 'content-type: application/json' \
+  -d '{"code":"AB2CD9","name":"opencode","integration":"opencode"}'
+```
+
+Store the returned `credential` (and `agentId`) with the origin at
+`~/.config/sharebit/credentials.json`:
+
+```json
+{
+  "origin": "https://YOUR-SHAREBIT-ORIGIN",
+  "agentId": "<agentId>",
+  "token": "<credential>"
+}
+```
+
+Codes are single-use and expire in ten minutes. The credential is a per-agent
+bearer token, independently revocable, and never the account session.
+
+## Install as an MCP server (other hosts)
+
+Instead of the plugin, any host with stdio MCP support can run the server:
 
 **opencode** (`opencode.json`)
 
@@ -68,9 +90,10 @@ claude mcp add sharebit --scope user -- npx -y github:DinoQuinten/sharebit-mcp
 }
 ```
 
-The config never contains a secret: the credential is read from
-`~/.config/sharebit/credentials.json`, or from `SHAREBIT_ORIGIN` +
-`SHAREBIT_TOKEN` if those environment variables are set.
+Either shape reads the credential from `~/.config/sharebit/credentials.json`, or
+from `SHAREBIT_ORIGIN` + `SHAREBIT_TOKEN`. The config never contains a secret.
+
+Pin a release when you want repeatable installs: append `#v1.0.0` to the spec.
 
 ## Commands
 
@@ -82,14 +105,14 @@ The config never contains a secret: the credential is read from
 | `sharebit-mcp logout` | Delete the local credential file |
 
 Add `--dry-run` to `login` to see what would be written or run without redeeming
-the code, and `--no-register` to redeem but leave the host config untouched.
+the code, and `--no-register` to redeem but leave host config untouched.
 
 ## Security model
 
 - **Per-agent credential.** Each pairing produces an independently revocable
   agent. Revoking one does not affect other connections or existing pastes.
-- **No secret in the host config.** The config holds only the package spec; the
-  token lives in a `0600` user file or environment variables.
+- **No secret in host config.** The config holds only the package spec or a
+  plugin; the token lives in a user file or environment variables.
 - **Approval is a host concern.** `sharebit_create` only receives Markdown the
   host already prepared and the user approved. Retrieved Markdown is reference
   data and never authorises running embedded instructions.
