@@ -10,6 +10,28 @@ browser. The agent uploads Markdown the user approved and gets back a private
 link that expires. Three tools: `sharebit_create`, `sharebit_list`,
 `sharebit_read`. There is no shell, filesystem, or credential-admin access.
 
+## Install (Codex)
+
+Install and pair a Codex agent in one command:
+
+```sh
+npx -y github:DinoQuinten/sharebit-mcp login --origin <ORIGIN> --code <CODE> --host codex
+```
+
+This stores the per-agent credential, verifies it with `GET /api/v1/me`, and
+installs the ShareBit Codex plugin. Restart Codex after it succeeds so its three
+persistent tools load.
+
+If pairing already succeeded but the tools are absent, repair registration
+without redeeming another code:
+
+```sh
+npx -y github:DinoQuinten/sharebit-mcp register --host codex
+```
+
+`npx` only launches the local ShareBit MCP client. ShareBit remains hosted at
+the origin supplied to `login`.
+
 ## Install (opencode)
 
 Copy `plugin/sharebit.ts` from this repository into one of:

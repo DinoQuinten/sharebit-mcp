@@ -4,6 +4,7 @@ import { runProxy } from "../src/proxy.js";
 import { credentialsPath, resolveCredentials } from "../src/credentials.js";
 import { clearCredential, redeem, saveCredential } from "../src/redeem.js";
 import { HOSTS, genericSnippet, registerHost } from "../src/register.js";
+import { verifyCredential } from "../src/status.js";
 import { USAGE, camelFlags, parseArgs } from "../src/args.js";
 
 const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
@@ -11,6 +12,9 @@ const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url),
 function printResult(result) {
   if (result.message) console.log(result.message);
   if (result.command) console.log(`\n  ${result.command}\n`);
+  if (result.commands) {
+    for (const command of result.commands) console.log(`\n  codex ${command.join(" ")}\n`);
+  }
   if (result.snippet) console.log(`\n${result.snippet}\n`);
 }
 
@@ -46,6 +50,14 @@ async function login(opts) {
   console.log(`Connected as "${result.agentName}" (${result.integration}).`);
   console.log(`Credential stored at ${file}`);
 
+  const verification = await verifyCredential({ origin: result.origin, token: result.credential });
+  if (verification.status !== "connected") {
+    console.log(`Credential verification: ${verification.status}${verification.code ? ` (${verification.code})` : ""}`);
+    process.exitCode = 1;
+    return;
+  }
+  console.log("Credential verification: connected");
+
   if (opts.noRegister) {
     console.log("\nSkipped host registration (--no-register). Add this to your host manually:");
     printResult({ snippet: genericSnippet() });
@@ -65,19 +77,22 @@ async function status() {
   }
   console.log(`Origin:     ${credentials.origin}`);
   console.log(`Credential: from ${credentials.source}`);
-  try {
-    const response = await fetch(`${credentials.origin}/api/v1/pastes?limit=1`, {
-      headers: { authorization: `Bearer ${credentials.token}` },
-    });
-    if (response.ok) console.log("Status:     connected");
-    else if (response.status === 401) {
-      console.log("Status:     rejected (run login again)");
-      process.exitCode = 1;
-    } else console.log(`Status:     unexpected (${response.status})`);
-  } catch (error) {
-    console.log(`Status:     unreachable (${error instanceof Error ? error.message : String(error)})`);
+  const result = await verifyCredential(credentials);
+  if (result.status === "connected") console.log("Status:     connected");
+  else if (result.status === "rejected") {
+    console.log("Status:     rejected (run login again)");
+    process.exitCode = 1;
+  } else if (result.status === "unexpected") {
+    console.log(`Status:     unexpected (${result.code})`);
+    process.exitCode = 1;
+  } else {
+    console.log(`Status:     unreachable (${result.error})`);
     process.exitCode = 1;
   }
+}
+
+function register(opts) {
+  printResult(registerHost(opts.host ?? "generic", { dryRun: opts.dryRun }));
 }
 
 function logout() {
@@ -105,6 +120,10 @@ async function main() {
   }
   if (command === "login") {
     await login(opts);
+    return;
+  }
+  if (command === "register") {
+    register(opts);
     return;
   }
   if (command === "logout") {

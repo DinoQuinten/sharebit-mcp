@@ -13,6 +13,10 @@
     "bin",
     "src",
     "plugin",
+    ".codex-plugin",
+    ".mcp.json",
+    ".agents",
+    "skills",
     "SKILL.md",
     "README.md",
     "LICENSE"

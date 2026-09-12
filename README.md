@@ -5,8 +5,25 @@ Connect a coding agent to [ShareBit](https://sharebit.app) over the
 tools — `sharebit_create`, `sharebit_list`, `sharebit_read` — and nothing else:
 no shell, filesystem, or credential-admin access.
 
-Two ways to install: as an **opencode plugin** (recommended, no config edit), or
-as a **stdio MCP server** for any other host.
+Use the native **Codex plugin**, an **opencode plugin**, or the stdio MCP server
+for another compatible host.
+
+## Install in Codex
+
+```sh
+npx -y github:DinoQuinten/sharebit-mcp login --origin https://YOUR-SHAREBIT-ORIGIN --code AB2CD9 --host codex
+```
+
+The command redeems the one-time code, stores the credential outside Codex's
+config, verifies it with `GET /api/v1/me`, and installs the ShareBit plugin.
+Restart Codex to load the tools. `npx` starts the local MCP client; it does not
+run the hosted ShareBit server.
+
+If credentials already exist, repair the plugin without redeeming a new code:
+
+```sh
+npx -y github:DinoQuinten/sharebit-mcp register --host codex
+```
 
 ## Install as an opencode plugin
 
@@ -101,6 +118,7 @@ Pin a release when you want repeatable installs: append `#v1.0.0` to the spec.
 | --- | --- |
 | `sharebit-mcp` | Run the stdio MCP server (hosts call this) |
 | `sharebit-mcp login ...` | Redeem a pairing code, store the credential, register the host |
+| `sharebit-mcp register --host codex` | Install the Codex plugin without redeeming a new code |
 | `sharebit-mcp status` | Report the stored origin and whether the credential still works |
 | `sharebit-mcp logout` | Delete the local credential file |
 

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { HOSTS, MCP_SPEC, genericSnippet, registerHost } from "../src/register.js";
+import { CODEX_PLUGIN, CODEX_MARKETPLACE, HOSTS, MCP_SPEC, genericSnippet, registerHost } from "../src/register.js";
 
 test("generic snippet is a stdio mcpServers entry", () => {
   const parsed = JSON.parse(genericSnippet());
@@ -54,6 +54,48 @@ test("unknown hosts fall back to the generic snippet", () => {
   assert.ok(result.snippet.includes("mcpServers"));
 });
 
+test("codex dry-run describes marketplace and plugin registration", () => {
+  const result = registerHost("codex", { dryRun: true });
+  assert.equal(result.ok, true);
+  assert.match(result.message, /Would register ShareBit with Codex/);
+  assert.deepEqual(result.commands, [
+    ["plugin", "marketplace", "add", CODEX_MARKETPLACE],
+    ["plugin", "add", CODEX_PLUGIN],
+  ]);
+});
+
+test("codex registration installs the marketplace before the plugin", () => {
+  const calls = [];
+  const result = registerHost("codex", {
+    run: (command, args) => {
+      calls.push([command, args]);
+      return { status: 0, error: null, stderr: "" };
+    },
+  });
+  assert.equal(result.ok, true);
+  assert.deepEqual(calls, [
+    ["codex", ["plugin", "marketplace", "list", "--json"]],
+    ["codex", ["plugin", "marketplace", "add", CODEX_MARKETPLACE]],
+    ["codex", ["plugin", "add", CODEX_PLUGIN]],
+  ]);
+});
+
+test("codex registration does not add an already configured ShareBit marketplace", () => {
+  const calls = [];
+  const result = registerHost("codex", {
+    run: (command, args) => {
+      calls.push([command, args]);
+      if (args[2] === "list") return { status: 0, error: null, stdout: JSON.stringify({ marketplaces: [{ name: "sharebit" }] }) };
+      return { status: 0, error: null, stderr: "" };
+    },
+  });
+  assert.equal(result.ok, true);
+  assert.deepEqual(calls, [
+    ["codex", ["plugin", "marketplace", "list", "--json"]],
+    ["codex", ["plugin", "add", CODEX_PLUGIN]],
+  ]);
+});
+
 test("exposes the supported host list", () => {
-  assert.deepEqual(HOSTS, ["opencode", "claude-code", "generic"]);
+  assert.deepEqual(HOSTS, ["opencode", "claude-code", "codex", "generic"]);
 });

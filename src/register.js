@@ -14,7 +14,9 @@ import { spawnSync } from "node:child_process";
 
 export const MCP_SPEC = "github:DinoQuinten/sharebit-mcp";
 export const MCP_COMMAND = ["npx", "-y", MCP_SPEC];
-export const HOSTS = ["opencode", "claude-code", "generic"];
+export const CODEX_MARKETPLACE = "DinoQuinten/sharebit-mcp";
+export const CODEX_PLUGIN = "sharebit@sharebit";
+export const HOSTS = ["opencode", "claude-code", "codex", "generic"];
 
 const PLUGIN_TEMPLATE = new URL("../plugin/sharebit.ts", import.meta.url);
 
@@ -79,12 +81,54 @@ function registerClaudeCode({ dryRun }) {
   return { ok: true, message: "Registered ShareBit with Claude Code (user scope). Restart Claude Code to load it." };
 }
 
-export function registerHost(host, { dryRun = false, env = process.env } = {}) {
+function runCodex(command, args) {
+  return spawnSync(command, args, {
+    shell: process.platform === "win32",
+    encoding: "utf8",
+    timeout: 10_000,
+  });
+}
+
+function registerCodex({ dryRun, run = runCodex }) {
+  const commands = [
+    ["plugin", "marketplace", "add", CODEX_MARKETPLACE],
+    ["plugin", "add", CODEX_PLUGIN],
+  ];
+  if (dryRun) return { ok: true, message: "Would register ShareBit with Codex.", commands };
+
+  const listed = run("codex", ["plugin", "marketplace", "list", "--json"]);
+  let marketplaceExists = false;
+  if (!listed.error && listed.status === 0) {
+    try {
+      const parsed = JSON.parse(listed.stdout || "{}");
+      marketplaceExists = Array.isArray(parsed.marketplaces) && parsed.marketplaces.some((item) => item?.name === "sharebit");
+    } catch {
+      // A non-JSON response is treated as unknown; the add command gives the user a clear recovery path.
+    }
+  }
+
+  for (const args of marketplaceExists ? [commands[1]] : commands) {
+    const result = run("codex", args);
+    if (result.error || result.status !== 0) {
+      return {
+        ok: false,
+        manual: true,
+        message: "Codex could not register ShareBit automatically. Run these commands, then restart Codex:",
+        commands,
+      };
+    }
+  }
+  return { ok: true, message: "Registered ShareBit with Codex. Restart Codex to load the tools." };
+}
+
+export function registerHost(host, { dryRun = false, env = process.env, run } = {}) {
   switch (host) {
     case "opencode":
       return registerOpencode({ dryRun, env });
     case "claude-code":
       return registerClaudeCode({ dryRun });
+    case "codex":
+      return registerCodex({ dryRun, run });
     case "generic":
       return {
         ok: true,
