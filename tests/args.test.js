@@ -30,3 +30,7 @@ test("maps aliases and camel-cases hyphenated flags", () => {
 test("defaults the command to null when no positional is given", () => {
   assert.equal(parseArgs(["--help"]).command, null);
 });
+
+test("parses the registration command", () => {
+  assert.equal(parseArgs(["register", "--host", "codex"]).command, "register");
+});

@@ -1,0 +1,6 @@
+{
+  "sharebit": {
+    "command": "npx",
+    "args": ["-y", "github:DinoQuinten/sharebit-mcp"]
+  }
+}

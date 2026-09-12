@@ -2,6 +2,7 @@ export const USAGE = `sharebit-mcp — connect a coding agent to ShareBit over M
 
 Usage:
   sharebit-mcp login --code <CODE> --origin <URL> [--name <NAME>] [--host <HOST>] [--dry-run]
+  sharebit-mcp register --host <HOST> [--dry-run]
   sharebit-mcp status
   sharebit-mcp logout
   sharebit-mcp                       Run the stdio MCP server (invoked by your MCP host)
@@ -10,7 +11,7 @@ Options:
   --origin <URL>    ShareBit origin, e.g. https://sharebit.example (or SHAREBIT_ORIGIN)
   --code <CODE>     Six-character one-time pairing code from the ShareBit setup page
   --name <NAME>     Agent display name (defaults to the integration label)
-  --host <HOST>     Auto-register the host: opencode | claude-code | generic
+  --host <HOST>     Auto-register the host: opencode | claude-code | codex | generic
   --integration <I> ShareBit integration label (defaults to the host)
   --dry-run         Show what would be written or run, change nothing
   --no-register     Redeem and store the credential, but do not touch host config
