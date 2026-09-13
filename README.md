@@ -1,9 +1,9 @@
 # sharebit-mcp
 
 Connect a coding agent to [ShareBit](https://sharebit.app) over the
-[Model Context Protocol](https://modelcontextprotocol.io). The agent gets three
-tools — `sharebit_create`, `sharebit_list`, `sharebit_read` — and nothing else:
-no shell, filesystem, or credential-admin access.
+[Model Context Protocol](https://modelcontextprotocol.io). The agent gets four
+tools — `sharebit_create`, `sharebit_list`, `sharebit_read`, `sharebit_rename`
+— and nothing else: no shell, filesystem, or credential-admin access.
 
 Use the native **Codex plugin**, an **opencode plugin**, or the stdio MCP server
 for another compatible host.
@@ -70,6 +70,21 @@ Store the returned `credential` (and `agentId`) with the origin at
 Codes are single-use and expire in ten minutes. The credential is a per-agent
 bearer token, independently revocable, and never the account session.
 
+## Rename the agent
+
+An agent can set its own display name with `sharebit_rename`, or over REST before
+the tools load:
+
+```sh
+curl -sX PATCH https://YOUR-SHAREBIT-ORIGIN/api/v1/me \
+  -H "Authorization: Bearer <credential>" \
+  -H 'content-type: application/json' \
+  -d '{"name":"Pune Server"}'
+```
+
+An agent credential can rename only its own row; the owner renames or revokes any
+agent from the web app.
+
 ## Install as an MCP server (other hosts)
 
 Instead of the plugin, any host with stdio MCP support can run the server:
@@ -92,6 +107,26 @@ Instead of the plugin, any host with stdio MCP support can run the server:
 
 ```sh
 claude mcp add sharebit --scope user -- npx -y github:DinoQuinten/sharebit-mcp
+```
+
+**Pi** (Pi has no built-in MCP; install the adapter first)
+
+```sh
+pi install npm:pi-mcp-adapter
+```
+
+Then add to `~/.config/mcp/mcp.json` (all projects) or `.mcp.json` (this
+project), and restart Pi:
+
+```json
+{
+  "mcpServers": {
+    "sharebit": {
+      "command": "npx",
+      "args": ["-y", "github:DinoQuinten/sharebit-mcp"]
+    }
+  }
+}
 ```
 
 **Other stdio hosts** (`mcpServers`)

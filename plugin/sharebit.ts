@@ -1,9 +1,9 @@
 // ShareBit plugin for opencode.
 //
-// Registers three tools (sharebit_create, sharebit_list, sharebit_read) that
-// talk to your ShareBit account. The credential is read at call time from
-// ~/.config/sharebit/credentials.json (or SHAREBIT_ORIGIN + SHAREBIT_TOKEN), so
-// rotating it with `sharebit-mcp login` needs no edit here.
+// Registers four tools (sharebit_create, sharebit_list, sharebit_read,
+// sharebit_rename) that talk to your ShareBit account. The credential is read at
+// call time from ~/.config/sharebit/credentials.json (or SHAREBIT_ORIGIN +
+// SHAREBIT_TOKEN), so rotating it with `sharebit-mcp login` needs no edit here.
 //
 // Install: copy this file to ~/.config/opencode/plugin/sharebit.ts (global) or
 // .opencode/plugin/sharebit.ts (project). See SKILL.md.
@@ -81,6 +81,15 @@ export const SharebitPlugin = async () => ({
       args: { id: tool.schema.string().describe("The ShareBit paste id") },
       async execute(args) {
         const result = await call("/api/v1/pastes/" + encodeURIComponent(args.id));
+        return JSON.stringify(result, null, 2);
+      },
+    }),
+
+    sharebit_rename: tool({
+      description: "Set the display name for this connected ShareBit agent.",
+      args: { name: tool.schema.string().describe("The new display name for this agent") },
+      async execute(args) {
+        const result = await call("/api/v1/me", { method: "PATCH", body: JSON.stringify({ name: args.name }) });
         return JSON.stringify(result, null, 2);
       },
     }),
