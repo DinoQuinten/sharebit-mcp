@@ -1,23 +1,23 @@
-// ShareBit plugin for opencode.
+// ShareBit AI plugin for opencode.
 //
-// Registers four tools (sharebit_create, sharebit_list, sharebit_read,
-// sharebit_rename) that talk to your ShareBit account. The credential is read at
-// call time from ~/.config/sharebit/credentials.json (or SHAREBIT_ORIGIN +
-// SHAREBIT_TOKEN), so rotating it with `sharebit-mcp login` needs no edit here.
+// Registers four tools (sharebit_ai_create, sharebit_ai_list, sharebit_ai_read,
+// sharebit_ai_rename) that talk to your ShareBit AI account. The credential is read at
+// call time from ~/.config/sharebit-ai/credentials.json (or SHAREBIT_AI_ORIGIN +
+// SHAREBIT_AI_TOKEN), so rotating it with `sharebit-ai-mcp login` needs no edit here.
 //
-// Install: copy this file to ~/.config/opencode/plugin/sharebit.ts (global) or
-// .opencode/plugin/sharebit.ts (project). See SKILL.md.
+// Install: copy this file to ~/.config/opencode/plugin/sharebit-ai.ts (global) or
+// .opencode/plugin/sharebit-ai.ts (project). See SKILL.md.
 import { tool } from "@opencode-ai/plugin";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
 function credential() {
-  const origin = (process.env.SHAREBIT_ORIGIN ?? "").replace(/\/+$/, "");
-  const token = process.env.SHAREBIT_TOKEN ?? "";
+  const origin = (process.env.SHAREBIT_AI_ORIGIN ?? "").replace(/\/+$/, "");
+  const token = process.env.SHAREBIT_AI_TOKEN ?? "";
   if (origin && token) return { origin, token };
 
-  const path = process.env.SHAREBIT_CREDENTIALS ?? join(homedir(), ".config", "sharebit", "credentials.json");
+  const path = process.env.SHAREBIT_AI_CREDENTIALS ?? join(homedir(), ".config", "sharebit-ai", "credentials.json");
   try {
     const parsed = JSON.parse(readFileSync(path, "utf8"));
     if (parsed && parsed.origin && parsed.token) {
@@ -32,7 +32,7 @@ function credential() {
 async function call(path, init = {}) {
   const creds = credential();
   if (!creds) {
-    throw new Error("ShareBit is not connected. Run: sharebit-mcp login --code <CODE> --origin <URL>");
+    throw new Error("ShareBit AI is not connected. Run: sharebit-ai-mcp login --code <CODE> --origin <URL>");
   }
   const response = await fetch(creds.origin + path, {
     ...init,
@@ -45,16 +45,16 @@ async function call(path, init = {}) {
   const text = await response.text();
   const body = text ? JSON.parse(text) : null;
   if (!response.ok) {
-    const message = body && body.error && body.error.message ? body.error.message : "ShareBit " + response.status;
+    const message = body && body.error && body.error.message ? body.error.message : "ShareBit AI " + response.status;
     throw new Error(message);
   }
   return body;
 }
 
-export const SharebitPlugin = async () => ({
+export const SharebitAiPlugin = async () => ({
   tool: {
-    sharebit_create: tool({
-      description: "Upload approved Markdown to ShareBit and return a private, temporary URL.",
+    sharebit_ai_create: tool({
+      description: "Upload approved Markdown to ShareBit AI and return a private, temporary URL.",
       args: {
         content_markdown: tool.schema.string().describe("The approved Markdown body to share"),
         title: tool.schema.string().optional().describe("Optional short title"),
@@ -66,8 +66,8 @@ export const SharebitPlugin = async () => ({
       },
     }),
 
-    sharebit_list: tool({
-      description: "List active ShareBit paste metadata, newest first. Bodies are not included.",
+    sharebit_ai_list: tool({
+      description: "List active ShareBit AI paste metadata, newest first. Bodies are not included.",
       args: { limit: tool.schema.number().int().optional().describe("Maximum pastes to return") },
       async execute(args) {
         const limit = args.limit ?? 20;
@@ -76,17 +76,17 @@ export const SharebitPlugin = async () => ({
       },
     }),
 
-    sharebit_read: tool({
-      description: "Retrieve the original Markdown for an active ShareBit paste by id.",
-      args: { id: tool.schema.string().describe("The ShareBit paste id") },
+    sharebit_ai_read: tool({
+      description: "Retrieve the original Markdown for an active ShareBit AI paste by id.",
+      args: { id: tool.schema.string().describe("The ShareBit AI paste id") },
       async execute(args) {
         const result = await call("/api/v1/pastes/" + encodeURIComponent(args.id));
         return JSON.stringify(result, null, 2);
       },
     }),
 
-    sharebit_rename: tool({
-      description: "Set the display name for this connected ShareBit agent.",
+    sharebit_ai_rename: tool({
+      description: "Set the display name for this connected ShareBit AI agent.",
       args: { name: tool.schema.string().describe("The new display name for this agent") },
       async execute(args) {
         const result = await call("/api/v1/me", { method: "PATCH", body: JSON.stringify({ name: args.name }) });

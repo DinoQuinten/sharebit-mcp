@@ -8,18 +8,18 @@ import { resolveCredentials } from "./credentials.js";
 export const PACKAGE_VERSION = "1.0.0";
 
 /**
- * Bridge a stdio MCP host to the hosted ShareBit MCP server at `<origin>/mcp`.
+ * Bridge a stdio MCP host to the hosted ShareBit AI MCP server at `<origin>/mcp`.
  *
  * The tool list and schemas are owned by the server and forwarded verbatim, so
  * this package never drifts from the deployed tools. The per-agent bearer token
  * is attached here, which is why the host config carries no secret.
  */
-export async function runProxy({ credentials, name = "sharebit-mcp" } = {}) {
+export async function runProxy({ credentials, name = "sharebit-ai-mcp" } = {}) {
   const resolved = credentials ?? resolveCredentials();
   if (!resolved) {
     throw new Error(
-      "No ShareBit credential found. Run `sharebit-mcp login --code <CODE> --origin <URL>`, " +
-        "or set SHAREBIT_ORIGIN and SHAREBIT_TOKEN.",
+      "No ShareBit AI credential found. Run `sharebit-ai-mcp login --code <CODE> --origin <URL>`, " +
+        "or set SHAREBIT_AI_ORIGIN and SHAREBIT_AI_TOKEN.",
     );
   }
 
@@ -37,7 +37,7 @@ export async function runProxy({ credentials, name = "sharebit-mcp" } = {}) {
   }
 
   const server = new Server(
-    { name: "sharebit", version: PACKAGE_VERSION },
+    { name: "sharebit-ai", version: PACKAGE_VERSION },
     { capabilities: { tools: {} } },
   );
 

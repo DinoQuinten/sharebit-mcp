@@ -1,18 +1,18 @@
-export const USAGE = `sharebit-mcp — connect a coding agent to ShareBit over MCP
+export const USAGE = `sharebit-ai-mcp — connect a coding agent to ShareBit AI over MCP
 
 Usage:
-  sharebit-mcp login --code <CODE> --origin <URL> [--name <NAME>] [--host <HOST>] [--dry-run]
-  sharebit-mcp register --host <HOST> [--dry-run]
-  sharebit-mcp status
-  sharebit-mcp logout
-  sharebit-mcp                       Run the stdio MCP server (invoked by your MCP host)
+  sharebit-ai-mcp login --code <CODE> --origin <URL> [--name <NAME>] [--host <HOST>] [--dry-run]
+  sharebit-ai-mcp register --host <HOST> [--dry-run]
+  sharebit-ai-mcp status
+  sharebit-ai-mcp logout
+  sharebit-ai-mcp                       Run the stdio MCP server (invoked by your MCP host)
 
 Options:
-  --origin <URL>    ShareBit origin, e.g. https://sharebit.example (or SHAREBIT_ORIGIN)
-  --code <CODE>     Six-character one-time pairing code from the ShareBit setup page
+  --origin <URL>    ShareBit AI origin, e.g. https://sharebitai.sid8x.com (or SHAREBIT_AI_ORIGIN)
+  --code <CODE>     Six-character one-time pairing code from the ShareBit AI setup page
   --name <NAME>     Agent display name (defaults to the integration label)
   --host <HOST>     Auto-register the host: opencode | claude-code | codex | generic
-  --integration <I> ShareBit integration label (defaults to the host)
+  --integration <I> ShareBit AI integration label (defaults to the host)
   --dry-run         Show what would be written or run, change nothing
   --no-register     Redeem and store the credential, but do not touch host config
   -h, --help        Show this help

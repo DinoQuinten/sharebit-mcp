@@ -1,4 +1,4 @@
-/** Verify an agent credential using ShareBit's canonical identity endpoint. */
+/** Verify an agent credential using ShareBit AI's canonical identity endpoint. */
 export async function verifyCredential(credentials, fetchImpl = fetch) {
   try {
     const response = await fetchImpl(`${credentials.origin}/api/v1/me`, {

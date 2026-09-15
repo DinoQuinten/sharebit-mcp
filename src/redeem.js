@@ -4,12 +4,12 @@ import { credentialsPath, normalizeOrigin } from "./credentials.js";
 
 /**
  * Redeem a one-time pairing code for a per-agent credential. Mirrors
- * `scripts/sharebit-connect.ts` and hits the same public endpoint, so no
+ * `scripts/sharebit-ai-connect.ts` and hits the same public endpoint, so no
  * account session or API key ever touches the setup flow.
  */
 export async function redeem({ origin, code, name, integration }) {
   const base = normalizeOrigin(origin);
-  if (!base) throw new Error("A ShareBit origin is required (--origin or SHAREBIT_ORIGIN)");
+  if (!base) throw new Error("A ShareBit AI origin is required (--origin or SHAREBIT_AI_ORIGIN)");
   if (!code || !code.trim()) throw new Error("A pairing code is required (--code)");
 
   let response;

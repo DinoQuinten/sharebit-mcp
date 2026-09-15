@@ -12,17 +12,21 @@ import { spawnSync } from "node:child_process";
  * it does not we write the file; where there is no universal path we print.
  */
 
-export const MCP_SPEC = "github:DinoQuinten/sharebit-mcp";
+export const MCP_SPEC = "github:DinoQuinten/sharebit-ai-mcp";
 export const MCP_COMMAND = ["npx", "-y", MCP_SPEC];
-export const CODEX_MARKETPLACE = "DinoQuinten/sharebit-mcp";
-export const CODEX_PLUGIN = "sharebit@sharebit";
+export const CODEX_MARKETPLACE = "DinoQuinten/sharebit-ai-mcp";
+/**
+ * Codex ids are `<plugin name>@<marketplace name>`, both kebab-case.
+ * @see docs-used.md#D47 (ShareBit AI main repo ledger) — plugin.json / marketplace.json name rules
+ */
+export const CODEX_PLUGIN = "sharebit-ai@sharebit-ai";
 export const HOSTS = ["opencode", "claude-code", "codex", "generic"];
 
-const PLUGIN_TEMPLATE = new URL("../plugin/sharebit.ts", import.meta.url);
+const PLUGIN_TEMPLATE = new URL("../plugin/sharebit-ai.ts", import.meta.url);
 
 export function genericSnippet() {
   return JSON.stringify(
-    { mcpServers: { sharebit: { command: "npx", args: ["-y", MCP_SPEC] } } },
+    { mcpServers: { "sharebit-ai": { command: "npx", args: ["-y", MCP_SPEC] } } },
     null,
     2,
   );
@@ -30,7 +34,7 @@ export function genericSnippet() {
 
 /** opencode auto-loads plugins from `<config>/plugin`; some versions use `plugins`. */
 export function opencodePluginDir(env = process.env) {
-  if (env.SHAREBIT_OPENCODE_DIR) return env.SHAREBIT_OPENCODE_DIR;
+  if (env.SHAREBIT_AI_OPENCODE_DIR) return env.SHAREBIT_AI_OPENCODE_DIR;
   const base = join(homedir(), ".config", "opencode");
   if (existsSync(join(base, "plugins"))) return join(base, "plugins");
   return join(base, "plugin");
@@ -38,10 +42,10 @@ export function opencodePluginDir(env = process.env) {
 
 function registerOpencode({ dryRun, env }) {
   const directory = opencodePluginDir(env);
-  const target = join(directory, "sharebit.ts");
+  const target = join(directory, "sharebit-ai.ts");
 
   if (dryRun) {
-    return { ok: true, target, message: `Would install the ShareBit opencode plugin at ${target}.` };
+    return { ok: true, target, message: `Would install the ShareBit AI opencode plugin at ${target}.` };
   }
 
   mkdirSync(directory, { recursive: true });
@@ -49,12 +53,12 @@ function registerOpencode({ dryRun, env }) {
   return {
     ok: true,
     target,
-    message: `Installed the ShareBit opencode plugin at ${target}. Restart opencode to load it.`,
+    message: `Installed the ShareBit AI opencode plugin at ${target}. Restart opencode to load it.`,
   };
 }
 
 function registerClaudeCode({ dryRun }) {
-  const args = ["mcp", "add", "sharebit", "--scope", "user", "--", ...MCP_COMMAND];
+  const args = ["mcp", "add", "sharebit-ai", "--scope", "user", "--", ...MCP_COMMAND];
   const printable = `claude ${args.join(" ")}`;
 
   if (dryRun) return { ok: true, message: `Would run: ${printable}` };
@@ -78,7 +82,7 @@ function registerClaudeCode({ dryRun }) {
       command: printable,
     };
   }
-  return { ok: true, message: "Registered ShareBit with Claude Code (user scope). Restart Claude Code to load it." };
+  return { ok: true, message: "Registered ShareBit AI with Claude Code (user scope). Restart Claude Code to load it." };
 }
 
 function runCodex(command, args) {
@@ -94,14 +98,14 @@ function registerCodex({ dryRun, run = runCodex }) {
     ["plugin", "marketplace", "add", CODEX_MARKETPLACE],
     ["plugin", "add", CODEX_PLUGIN],
   ];
-  if (dryRun) return { ok: true, message: "Would register ShareBit with Codex.", commands };
+  if (dryRun) return { ok: true, message: "Would register ShareBit AI with Codex.", commands };
 
   const listed = run("codex", ["plugin", "marketplace", "list", "--json"]);
   let marketplaceExists = false;
   if (!listed.error && listed.status === 0) {
     try {
       const parsed = JSON.parse(listed.stdout || "{}");
-      marketplaceExists = Array.isArray(parsed.marketplaces) && parsed.marketplaces.some((item) => item?.name === "sharebit");
+      marketplaceExists = Array.isArray(parsed.marketplaces) && parsed.marketplaces.some((item) => item?.name === "sharebit-ai");
     } catch {
       // A non-JSON response is treated as unknown; the add command gives the user a clear recovery path.
     }
@@ -113,12 +117,12 @@ function registerCodex({ dryRun, run = runCodex }) {
       return {
         ok: false,
         manual: true,
-        message: "Codex could not register ShareBit automatically. Run these commands, then restart Codex:",
+        message: "Codex could not register ShareBit AI automatically. Run these commands, then restart Codex:",
         commands,
       };
     }
   }
-  return { ok: true, message: "Registered ShareBit with Codex. Restart Codex to load the tools." };
+  return { ok: true, message: "Registered ShareBit AI with Codex. Restart Codex to load the tools." };
 }
 
 export function registerHost(host, { dryRun = false, env = process.env, run } = {}) {

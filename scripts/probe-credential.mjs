@@ -2,7 +2,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 
-const origin = (process.env.SHAREBIT_TEST_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+const origin = (process.env.SHAREBIT_AI_TEST_URL ?? "http://localhost:3000").replace(/\/+$/, "");
 const target = process.argv[2];
 if (!target) throw new Error("usage: node probe-credential.mjs <credentials.json>");
 

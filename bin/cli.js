@@ -22,8 +22,8 @@ async function runServer() {
   const credentials = resolveCredentials();
   if (!credentials) {
     console.error(
-      "sharebit-mcp: no credential found. Run `sharebit-mcp login --code <CODE> --origin <URL>` " +
-        "or set SHAREBIT_ORIGIN and SHAREBIT_TOKEN.",
+      "sharebit-ai-mcp: no credential found. Run `sharebit-ai-mcp login --code <CODE> --origin <URL>` " +
+        "or set SHAREBIT_AI_ORIGIN and SHAREBIT_AI_TOKEN.",
     );
     process.exit(1);
   }
@@ -31,7 +31,7 @@ async function runServer() {
 }
 
 async function login(opts) {
-  const origin = opts.origin ?? process.env.SHAREBIT_ORIGIN;
+  const origin = opts.origin ?? process.env.SHAREBIT_AI_ORIGIN;
 
   if (opts.dryRun) {
     console.log("[dry-run] No pairing code redeemed and no files changed.");
@@ -72,7 +72,7 @@ async function login(opts) {
 async function status() {
   const credentials = resolveCredentials();
   if (!credentials) {
-    console.error("sharebit-mcp: not connected. Run `sharebit-mcp login --code <CODE> --origin <URL>`.");
+    console.error("sharebit-ai-mcp: not connected. Run `sharebit-ai-mcp login --code <CODE> --origin <URL>`.");
     process.exit(1);
   }
   console.log(`Origin:     ${credentials.origin}`);
@@ -98,7 +98,7 @@ function register(opts) {
 function logout() {
   const { file, removed } = clearCredential();
   console.log(removed ? `Removed ${file}` : `No credential file at ${file}`);
-  console.log("The agent stays registered on the ShareBit server until you revoke it from Connected.");
+  console.log("The agent stays registered on the ShareBit AI server until you revoke it from Connected.");
 }
 
 async function main() {
@@ -141,6 +141,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(`sharebit-mcp: ${error instanceof Error ? error.message : String(error)}`);
+  console.error(`sharebit-ai-mcp: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
 });

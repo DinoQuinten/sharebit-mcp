@@ -1,6 +1,6 @@
 {
-  "sharebit": {
+  "sharebit-ai": {
     "command": "npx",
-    "args": ["-y", "github:DinoQuinten/sharebit-mcp"]
+    "args": ["-y", "github:DinoQuinten/sharebit-ai-mcp"]
   }
 }

@@ -1,11 +1,11 @@
 {
-  "name": "sharebit",
+  "name": "sharebit-ai",
   "interface": {
-    "displayName": "ShareBit"
+    "displayName": "ShareBit AI"
   },
   "plugins": [
     {
-      "name": "sharebit",
+      "name": "sharebit-ai",
       "source": {
         "source": "local",
         "path": "./"

@@ -1,10 +1,18 @@
 {
-  "name": "sharebit-mcp",
-  "version": "1.1.0",
-  "description": "ShareBit MCP server: pair a coding agent with your ShareBit account and share Markdown over stdio.",
+  "name": "sharebit-ai-mcp",
+  "version": "2.0.0",
+  "description": "ShareBit AI MCP client: pair a coding agent with your ShareBit AI account (sharebitai.sid8x.com) and share Markdown over stdio.",
+  "homepage": "https://sharebitai.sid8x.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DinoQuinten/sharebit-ai-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DinoQuinten/sharebit-ai-mcp/issues"
+  },
   "type": "module",
   "bin": {
-    "sharebit-mcp": "./bin/cli.js"
+    "sharebit-ai-mcp": "./bin/cli.js"
   },
   "exports": {
     ".": "./src/proxy.js"
@@ -30,6 +38,7 @@
   "keywords": [
     "mcp",
     "modelcontextprotocol",
+    "sharebit-ai",
     "sharebit",
     "markdown",
     "clipboard"
